@@ -11,7 +11,7 @@ out/
 .classpath
 .factorypath
 .project
-.properties
+*.properties
 .settings
 .springBeans
 .sts4-cache
