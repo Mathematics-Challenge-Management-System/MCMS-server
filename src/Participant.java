@@ -1,5 +1,7 @@
 import java.io.IOException;
+
 import java.time.LocalDateTime;
+
 
 public class Participant {
     private int participantId;
@@ -59,6 +61,7 @@ public class Participant {
                 DBO dbo = new DBO();
                 dbo.connect();
                 if(dbo.checkChallengeExists(command)){
+
                 String[] challengeDetails=dbo.getChallengeDetails(command);
                 String[] details={"Challenge name: "+challengeDetails[0],"Challenge description: "+challengeDetails[1],"Challenge duration(minutes): "+challengeDetails[2],"Questions to answer: "+challengeDetails[3],"Marks for wrong answer: "+challengeDetails[4],"Marks for correct answer: 1","Marks for unanswered question: "+challengeDetails[5]};
                 Challenge challenge = new Challenge(challengeDetails[0],challengeDetails[1],Integer.parseInt(challengeDetails[2]),Integer.parseInt(challengeDetails[3]),Integer.parseInt(challengeDetails[4]),Integer.parseInt(challengeDetails[5]), challengeDetails[6],challengeDetails[7],challengeDetails[8]);
@@ -79,8 +82,7 @@ public class Participant {
                 }else {
                     Main.server.printWriter.println("invalid challenge");
                 }
-
-                start();
+   start();
             }
 
         } catch (IOException e) {

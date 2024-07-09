@@ -156,6 +156,7 @@ public class DBO {
         }
     }
 
+
     //method to  get an email from mcmcs.participant and mcms.school_represenatative that takes username
     public String getEmail(String username) {
         query = "SELECT email FROM mcms.participant WHERE username = '" + username + "'";
@@ -177,17 +178,26 @@ public class DBO {
         query = "SELECT rep_email FROM mcms.school_representative WHERE school_regNo = '" + school + "'";
         try {
             resultSet = statement.executeQuery(query);
-            if (resultSet.next()) return resultSet.getString("rep_email");
-            return null;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     //method to get the image of a participant
     public byte[] getImage(String username) {
         query = "SELECT image FROM mcms.participant WHERE username = '" + username + "'";
+        try {
+            resultSet = statement.executeQuery(query);
+            if (resultSet.next()) return resultSet.getBytes("image");
+
+
+
+
+    //method to get the image of a rejected participant
+    public byte[] getRejectedImage(String username) {
+        query = "SELECT image FROM mcms.rejected_participant WHERE username = '" + username + "'";
+
+
+    //method to get the image of a participant
+    public byte[] getImage(String username) {
+        query = "SELECT image FROM mcms.participant WHERE username = '" + username + "'";
+
         try {
             resultSet = statement.executeQuery(query);
             if (resultSet.next()) return resultSet.getBytes("image");
@@ -201,6 +211,7 @@ public class DBO {
     //method to get the image of a rejected participant
     public byte[] getRejectedImage(String username) {
         query = "SELECT image FROM mcms.rejected_participant WHERE username = '" + username + "'";
+
         try {
             resultSet = statement.executeQuery(query);
             if (resultSet.next()) return resultSet.getBytes("image");
@@ -214,6 +225,7 @@ public class DBO {
     //method to get the image of a school representative
     public byte[] getRepImage(String username) {
         query = "SELECT image FROM mcms.school_representative WHERE rep_username = '" + username + "'";
+
         try {
             resultSet = statement.executeQuery(query);
             if (resultSet.next()) return resultSet.getBytes("image");
@@ -265,6 +277,7 @@ public class DBO {
             resultSet = statement.executeQuery(query);
             resultSet.next();
             return new String[]{resultSet.getString("username"), resultSet.getString("fname"), resultSet.getString("lname"), resultSet.getString("email"), resultSet.getString("dob"), resultSet.getString("schoolRegNo")};
+
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
@@ -288,11 +301,13 @@ public class DBO {
             resultSet = statement.executeQuery(query);
             resultSet.next();
             return new String[]{resultSet.getString("challenge_name"), resultSet.getString("challenge_description"), resultSet.getString("duration"), resultSet.getString("questions_to_answer"),resultSet.getString("wrong_answer_marks"), resultSet.getString("blank_answer_marks"), resultSet.getString("challenge_start_date"), resultSet.getString("challenge_end_date"), resultSet.getString("challenge_id")};
+
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
         }
     }
+
 //get random questions and their answers from question table where challenge id is equal to the challenge id
     public String[][] getQuestions(String id, int questions) {
 
