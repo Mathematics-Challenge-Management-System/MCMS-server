@@ -28,7 +28,7 @@ public class DBO {
     public void connect() {
         try {
             connection = DriverManager.getConnection(url, username, password);
-            statement = connection.createStatement();
+            statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -44,7 +44,6 @@ public class DBO {
     }
 
 
-
     public boolean checkParticipant(String username, String password) {
         query = "SELECT * FROM mcms.participant WHERE username = '" + username + "' AND password = '" + password + "'";
         try {
@@ -55,6 +54,7 @@ public class DBO {
             return false;
         }
     }
+
     public boolean checkRepresentative(String username, String password) {
         query = "SELECT * FROM mcms.school_representative WHERE rep_username = '" + username + "' AND rep_password = '" + password + "'";
         try {
@@ -65,6 +65,7 @@ public class DBO {
             return false;
         }
     }
+
     public String[] getRepresentative(String username) {
         query = "SELECT * FROM mcms.school_representative WHERE rep_username = '" + username + "'";
         try {
@@ -123,6 +124,7 @@ public class DBO {
             e.printStackTrace();
         }
     }
+
     //method to check whether username is in either participant tables or school_representative table
     public boolean checkUsername(String username) {
         query = "SELECT * FROM mcms.participant WHERE username = '" + username + "'";
@@ -132,10 +134,10 @@ public class DBO {
             query = "SELECT * FROM mcms.school_representative WHERE rep_username = '" + username + "'";
             resultSet = statement.executeQuery(query);
 
-             if(resultSet.next()) return true;
-             query="SELECT * FROM mcms.rejected_participant WHERE username = '"+username+"'";
-                resultSet=statement.executeQuery(query);
-                return resultSet.next();
+            if (resultSet.next()) return true;
+            query = "SELECT * FROM mcms.rejected_participant WHERE username = '" + username + "'";
+            resultSet = statement.executeQuery(query);
+            return resultSet.next();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -153,14 +155,142 @@ public class DBO {
             return false;
         }
     }
-    // querry to store image byte array in the database
 
+    //method to  get an email from mcmcs.participant and mcms.school_represenatative that takes username
+    public String getEmail(String username) {
+        query = "SELECT email FROM mcms.participant WHERE username = '" + username + "'";
+        try {
+            resultSet = statement.executeQuery(query);
+            if (resultSet.next()) return resultSet.getString("email");
+            query = "SELECT rep_email FROM mcms.school_representative WHERE rep_username = '" + username + "'";
+            resultSet = statement.executeQuery(query);
+            if (resultSet.next()) return resultSet.getString("rep_email");
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
+    //method to get an email from school_representative using school reg number
+    public String getSchoolEmail(String school) {
+        query = "SELECT rep_email FROM mcms.school_representative WHERE school_regNo = '" + school + "'";
+        try {
+            resultSet = statement.executeQuery(query);
+            if (resultSet.next()) return resultSet.getString("rep_email");
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
+    //method to get the image of a participant
+    public byte[] getImage(String username) {
+        query = "SELECT image FROM mcms.participant WHERE username = '" + username + "'";
+        try {
+            resultSet = statement.executeQuery(query);
+            if (resultSet.next()) return resultSet.getBytes("image");
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
+    //method to get the image of a rejected participant
+    public byte[] getRejectedImage(String username) {
+        query = "SELECT image FROM mcms.rejected_participant WHERE username = '" + username + "'";
+        try {
+            resultSet = statement.executeQuery(query);
+            if (resultSet.next()) return resultSet.getBytes("image");
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
+    //method to get the image of a school representative
+    public byte[] getRepImage(String username) {
+        query = "SELECT image FROM mcms.school_representative WHERE rep_username = '" + username + "'";
+        try {
+            resultSet = statement.executeQuery(query);
+            if (resultSet.next()) return resultSet.getBytes("image");
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    // method to get the rep username using school reg number
+    public String getRepUsername(String school) {
+        query = "SELECT rep_username FROM mcms.school_representative WHERE school_regNo = '" + school + "'";
+        try {
+            resultSet = statement.executeQuery(query);
+            if (resultSet.next()) return resultSet.getString("rep_username");
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
+    //a method to get all challenge names   from the database where the start date is less than the current date and the end date is greater than the current date
+    public String[] getChallenges()  {
 
+        query = "SELECT * FROM mcms.challenge WHERE challenge.challenge_start_date < CURDATE() AND challenge.challenge_end_date > CURDATE();";
+        try {
+            resultSet = statement.executeQuery(query);
+            //return null if resultset is empty
+            if (!resultSet.next()) return null;
+            resultSet.last();
+            String[] challenges = new String[resultSet.getRow()];
+            resultSet.beforeFirst();
+            int i = 0;
+            while (resultSet.next()) {
+                challenges[i] = "Challenge name : "+resultSet.getString("challenge_name").toUpperCase()+"\nChallenge Description: " +resultSet.getString("challenge_description");
+                i++;
+            }
+            return challenges;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+    //get participant details
+    public String[] getParticipantDetails(String username) {
+        query = "SELECT * FROM mcms.participant WHERE username = '" + username + "'";
+        try {
+            resultSet = statement.executeQuery(query);
+            resultSet.next();
+            return new String[]{resultSet.getString("username"), resultSet.getString("fname"), resultSet.getString("lname"), resultSet.getString("email"), resultSet.getString("dob"), resultSet.getString("schoolRegNo")};
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    //check challenge exists
+    public boolean checkChallengeExists(String challengeName) {
+        query = "SELECT * FROM mcms.challenge WHERE challenge_name = '" + challengeName + "'";
+        try {
+            resultSet = statement.executeQuery(query);
+            return resultSet.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
-
+    public String[] getChallengeDetails(String challengeName) {
+        query = "SELECT * FROM mcms.challenge WHERE challenge_name = '" + challengeName + "'";
+        try {
+            resultSet = statement.executeQuery(query);
+            resultSet.next();
+            return new String[]{resultSet.getString("challenge_name"), resultSet.getString("challenge_description"), resultSet.getString("duration"), resultSet.getString("questions_to_answer"),resultSet.getString("wrong_answer_marks")};
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

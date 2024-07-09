@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.util.Arrays;
 
+
 public class Main {
     static Server server=null;
     static String[] request;
@@ -14,6 +15,7 @@ public class Main {
 
 
         initialCommands = new String[]{"register", "login"};
+
 
 
         try {

@@ -76,7 +76,12 @@ public class Server {
     public void login(String[] request) {
         DBO dbo = new DBO();
         dbo.connect();
-        if (dbo.checkParticipant(request[1],hashPassword(request[2]) )) printWriter.println("participant "+request[1]);
+        if (dbo.checkParticipant(request[1],hashPassword(request[2]) )){
+            printWriter.println("participant "+request[1]);
+            Participant participant = new Participant(dbo.getParticipantDetails(request[1]));
+            participant.start();
+
+        }
         else if (dbo.checkRepresentative(request[1],hashPassword(request[2]) )) {
             printWriter.println("representative "+request[1]);
             Representative rep = new Representative(dbo.getRepresentative(request[1]));
